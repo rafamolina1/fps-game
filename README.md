@@ -1,13 +1,12 @@
-# Bagunça Cósmica
-FPS arcade de navegador para 2–8 amigos. No Rei do Pato, encoste no pato e acumule um ponto por segundo. Um acerto solta o pato. No Laser Tag, cada acerto em um adversário marca um ponto para sua equipe. A meta ou o relógio encerra a rodada. Empates são permitidos.
+# Pátio
+FPS de navegador com mapa original, teclado e mouse. Duas equipes disputam rodadas de eliminação de 90 segundos. Cada jogador tem uma vida por rodada. Ao fim do tempo, ganha quem tiver mais sobreviventes. Empates não dão pontos. A primeira equipe com três vitórias ganha a partida.
 
-## Jogar localmente
-Com Node 20 ou superior, rode `npm install` e `npm start`. Abra http://localhost:3000 em um navegador de desktop, crie uma sala e entre em uma segunda janela com o código. Na LAN, compartilhe o endereço de rede do computador. Three.js é instalado pelo npm e servido localmente. O terminal mostra o endereço quando o servidor está pronto. O comando permanece em execução enquanto o jogo está aberto.
+## Começar
+Com Node 20 ou superior, execute npm install e npm start. Abra o endereço mostrado no terminal, digite um apelido e crie uma sala. Sozinho, use Iniciar treino para praticar com alvos. Para competir, convide de 2 a 8 jogadores pelo link ou código antes de iniciar. Na rede local, abra o jogo pelo endereço LAN do anfitrião antes de copiar o convite.
 
-## Publicar
-A opção mais simples é importar este repositório em um serviço Node com WebSocket (por exemplo Render Web Service), instalar com `npm install` e iniciar com `npm start`. Uma instância serve o site e as salas no mesmo endereço. O processo usa PORT fornecido pela plataforma. Compartilhe o link HTTPS.
+WASD move, o mouse ou as setas giram a visão, clique ou espaço dispara, R recarrega e Esc abre o menu. O anfitrião pode voltar ao lobby para receber amigos.
 
-Para usar a Vercel, publique primeiro o serviço Node acima. Importe o mesmo repositório na Vercel com preset Other e configure GAME_SERVER_URL como wss:// seguido do domínio público do serviço Node. Faça o deploy após definir a variável. vercel.json executa node build.js e publica dist. A Vercel serve o cliente e as conexões de jogo vão direto ao serviço Node.
+## Hospedagem
+Um serviço Node com WebSocket pode servir tudo no mesmo endereço. Use npm install e npm start com uma instância e a porta indicada por PORT. As salas ficam na memória.
 
-## Partidas
-O anfitrião define vagas ao criar a sala e escolhe modo, duração e meta antes de iniciar. Use Copiar convite para compartilhar o código no link. Cada participante clica em Jogar para capturar o mouse. WASD move, mouse mira, clique dispara, Shift corre, espaço pula e Esc abre sensibilidade e volume. Quando o anfitrião sai, a sala fecha. Um reinício do processo encerra todas as salas. Mantenha uma única instância do servidor, pois o estado fica em memória.
+Na Vercel, use o preset Other e defina GAME_SERVER_URL como a URL wss:// do servidor Node antes do build. O arquivo vercel.json publica dist. Rode npm run build para gerar os arquivos estáticos.

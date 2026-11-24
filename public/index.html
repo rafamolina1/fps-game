@@ -1,20 +1,9 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Bagunça Cósmica</title><link rel="stylesheet" href="/style.css">
-<body><main id="panel"><header>◉ &nbsp; ARCADE ORBITAL</header><h1>Bagunça<br><em>Cósmica.</em></h1>
-<section id="home"><p>Roube o pato. Empurre seus amigos para o espaço.</p><label>Apelido<input id="nick" maxlength="18" placeholder="Como vão te chamar?"></label><label>Vagas na sua sala<select id="cap"><option>8</option><option>6</option><option>4</option><option>2</option></select></label><button id="create">Criar sala privada</button><div class="row"><input id="code" maxlength="6" placeholder="Código da sala"><button id="join">Entrar</button></div></section>
-<section id="room" hidden><h2 id="title"></h2><button id="copy">Copiar convite</button><ol id="roster"></ol><div id="options"><label>Modo<select id="mode"><option value="duck">Rei do Pato</option><option value="laser">Laser Tag Caótico</option></select></label><div class="row"><label>Minutos<input id="minutes" type="number" min="1" max="10" value="3"></label><label>Meta de pontos<input id="goal" type="number" min="1" max="180" value="30"></label></div><button id="start">Iniciar rodada</button><button id="lobby" hidden>Voltar ao lobby</button></div><button class="exit">Sair da sala</button></section>
-<section id="pause" hidden><h2>Entrar na arena</h2><p>WASD move · Mouse mira · Clique dispara · Espaço pula · Shift corre · Esc abre o menu</p><label>Sensibilidade<input type="range" id="sens" min="1" max="8" value="3"></label><label>Volume<input type="range" id="vol" min="0" max="10" value="4"></label><button id="resume">Jogar</button><button class="exit">Sair da sala</button></section><output id="msg" role="status"></output></main>
-<div id="hud" hidden><strong id="clock"></strong><span id="objective"></span><b id="cross">+</b><div id="status"></div></div><script type="module">
-const message=document.getElementById('msg');
-message.textContent='Carregando o jogo…';
-document.getElementById('create').disabled=true;
-document.getElementById('join').disabled=true;
-try {
- await import('/game.js');
- message.textContent='';
- document.getElementById('create').disabled=false;
- document.getElementById('join').disabled=false;
-} catch(error) {
- message.textContent='Falha ao carregar o jogo: '+error.message;
- console.error(error);
-}
-</script></body></html>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pátio • FPS</title><link rel="stylesheet" href="/style.css"></head><body>
+<canvas id="arena" aria-label="Arena em primeira pessoa"></canvas>
+<main id="panel"><h1>PÁTIO<span> / FPS</span></h1>
+<section id="home"><p>Duas equipes. Uma vida por rodada. A primeira a vencer três leva a partida.</p><label>Apelido<input maxlength="18" id="nick" placeholder="Seu nome"></label><label>Limite da sala<select id="cap"><option>8</option><option>6</option><option>4</option><option>2</option><option>1</option></select></label><button id="create" disabled>Criar sala privada</button><div class="row"><input id="code" maxlength="6" placeholder="Código da sala" aria-label="Código da sala"><button id="join" disabled>Entrar</button></div></section>
+<section id="room" hidden><h2 id="title"></h2><p id="summary"></p><ul id="roster"></ul><button id="copy">Copiar convite</button><button id="start">Iniciar partida</button></section>
+<section id="pause" hidden><h2 id="pauseTitle">Entrar na arena</h2><p>WASD para mover, mouse ou setas para virar, clique ou espaço para disparar e R para recarregar. Esc abre o menu.</p><button id="resume">Jogar</button></section>
+<button id="back" hidden>Voltar ao lobby</button><button id="exit" hidden>Sair da sala</button><output id="msg" role="status">Carregando…</output></main>
+<div id="hud" hidden><div id="score"></div><div id="notice"></div><div id="stats"></div></div>
+<script type="module">try{await import('./game.js')}catch(e){document.getElementById('msg').textContent='Falha ao carregar o jogo: '+e.message}</script></body></html>

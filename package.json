@@ -1,12 +1,1 @@
-{
-  "name": "bagunca-cosmica",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "ws": "8.18.3",
-    "three": "0.170.0"
-  }
-}
+{"name":"patio-fps","private":true,"type":"module","scripts":{"start":"node server.js","build":"node build.js"},"dependencies":{"ws":"8.18.3"}}
