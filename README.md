@@ -2,7 +2,7 @@
 FPS arcade de navegador para 2–8 amigos. No Rei do Pato, encoste no pato e acumule um ponto por segundo. Um acerto solta o pato. No Laser Tag, cada acerto em um adversário marca um ponto para sua equipe. A meta ou o relógio encerra a rodada. Empates são permitidos.
 
 ## Jogar localmente
-Com Node 20 ou superior, rode `npm install` e `npm start`. Abra http://localhost:3000 em um navegador de desktop, crie uma sala e entre em uma segunda janela com o código. Na LAN, compartilhe o endereço de rede do computador. O cliente carrega Three.js de um CDN e precisa de internet.
+Com Node 20 ou superior, rode `npm install` e `npm start`. Abra http://localhost:3000 em um navegador de desktop, crie uma sala e entre em uma segunda janela com o código. Na LAN, compartilhe o endereço de rede do computador. Three.js é instalado pelo npm e servido localmente. O terminal mostra o endereço quando o servidor está pronto. O comando permanece em execução enquanto o jogo está aberto.
 
 ## Publicar
 A opção mais simples é importar este repositório em um serviço Node com WebSocket (por exemplo Render Web Service), instalar com `npm install` e iniciar com `npm start`. Uma instância serve o site e as salas no mesmo endereço. O processo usa PORT fornecido pela plataforma. Compartilhe o link HTTPS.
