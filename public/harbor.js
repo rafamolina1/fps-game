@@ -1,5 +1,5 @@
 import * as T from './three.module.min.js';
-import {map} from './world.js';
+import {structure} from './world.js';
 
 const S=2.6, steel='#364e55', dark='#283941', yellow='#e4aa32';
 let seed=76129;
@@ -95,27 +95,13 @@ export function createHarbor(canvas){
   for(const b of [-1,1])block(x,base+h+.025,z+b*(d/2-.05),w,.08,.12,steel);
  }
  // Combine adjacent cells so each building has a continuous facade.
- const seen=new Set();
- for(let z=0;z<map.length;z++)for(let x=0;x<map[z].length;x++){
-  const tile=map[z][x];if(tile==='.'||seen.has(x+','+z))continue;
-  let w=1,d=1;
-  while(map[z][x+w]===tile&&!seen.has((x+w)+','+z))w++;
-  while(map[z+d]&&Array.from({length:w},(_,i)=>map[z+d][x+i]===tile&&!seen.has((x+i)+','+(z+d))).every(Boolean))d++;
-  for(let j=0;j<d;j++)for(let i=0;i<w;i++)seen.add((x+i)+','+(z+j));
-  const cx=(x+w/2)*S,cz=(z+d/2)*S,bw=w*S,bd=d*S;
-  if(tile==='1'&&(z===0||z+d===map.length||x===0||x+w===20)){
-   // Exterior sheds extend away from playable space to carry believable roofs.
-   const horizontal=w>d,units=Math.ceil(Math.max(w,d)/4);
-   for(let i=0;i<units;i++){
-    const xx=cx+(horizontal?((i+.5)/units-.5)*bw:0),zz=cz+(horizontal?0:((i+.5)/units-.5)*bd);
-    const hh=5.2+(i%3)*.75,ww=horizontal?bw/units:bw,dd=horizontal?bd:bd/units;
-    block(xx,hh/2,zz,ww,hh,dd,factory);block(xx,hh+.06,zz,ww+.25,.17,dd+.25,steel);
-    block(xx,hh+.38,zz,ww*.46,.59,dd*.64,'#718381');
-   }
+ for(const {kind,cx,cz,w,d,h,stack,tile} of structure){
+  if(kind==='shed'){
+   block(cx,h/2,cz,w,h,d,factory);block(cx,h+.06,cz,w+.25,.17,d+.25,steel);
+   block(cx,h+.38,cz,w*.46,.59,d*.64,'#718381');
   }else{
-   const tex=tile==='1'?blue:tile==='2'?red:green;
-   cargo(cx,cz,bw,bd,2.52,tex);
-   if((x===14&&z===5)||(z===2&&x===16))cargo(cx,cz,bw,bd,2.47,red,2.56);
+   cargo(cx,cz,w,d,h,tile==='1'?blue:tile==='2'?red:green);
+   if(stack)cargo(cx,cz,w,d,2.47,red,2.56);
   }
  }
  // Gantry crane spans the quay. Trusses and catwalks share instance batches.
@@ -162,25 +148,77 @@ export function createHarbor(canvas){
  function oval(parent,x,y,z,w,h,d,c){const m=piece(parent,new T.SphereGeometry(1,14,10),c,x,y,z);m.scale.set(w,h,d);return m;}
  const gun=new T.Group();overlay.add(gun);
  // Stylized service pistol, with a contoured slide, gloved hand and sleeve.
+ const upper=new T.Group();gun.add(upper);
  const slide=new T.Shape();slide.moveTo(-.045,-.026);slide.lineTo(.045,-.026);slide.lineTo(.045,.017);slide.lineTo(.035,.032);slide.lineTo(-.035,.032);slide.lineTo(-.045,.017);slide.closePath();
- piece(gun,new T.ExtrudeGeometry(slide,{depth:.31,bevelEnabled:true,bevelSize:.003,bevelThickness:.004,bevelSegments:1}), '#424e50',0,0,-.34);
+ piece(upper,new T.ExtrudeGeometry(slide,{depth:.31,bevelEnabled:true,bevelSize:.003,bevelThickness:.004,bevelSegments:1}), '#424e50',0,0,-.34);
  box(gun,0,-.04,-.17,.086,.033,.27,'#303938');
  box(gun,0,-.10,-.082,.077,.145,.067,'#434941').rotation.x=-.25;
- for(const x of [-.034,.034])box(gun,x,.038,-.057,.014,.016,.023,'#292f30');
- box(gun,0,.036,-.326,.011,.012,.013,'#d1c6a3');
- for(let i=0;i<7;i++)for(const side of [-1,1])box(gun,side*.046,.001,-.05-i*.009,.004,.035,.003,'#212d2e');
+ for(const x of [-.034,.034])box(upper,x,.038,-.057,.014,.016,.023,'#292f30');
+ box(upper,0,.036,-.326,.011,.012,.013,'#d1c6a3');
+ for(let i=0;i<7;i++)for(const side of [-1,1])box(upper,side*.046,.001,-.05-i*.009,.004,.035,.003,'#212d2e');
  box(gun,0,-.081,-.143,.026,.012,.081,'#333c39');box(gun,0,-.063,-.181,.026,.047,.009,'#333c39');
  oval(gun,-.011,-.111,-.085,.056,.057,.067,'#504e41');
  for(let i=0;i<3;i++)oval(gun,-.031,-.08-i*.021,-.112,.037,.014,.033,'#79705a');
  oval(gun,-.065,-.131,-.095,.045,.053,.069,'#766e55');
- box(gun,0,.001,-.023,.064,.038,.006,'#313c3e');
- for(let i=0;i<5;i++)box(gun,0,-.013+i*.006,-.019,.049,.0018,.002,'#697172');
- box(gun,.046,.009,-.215,.002,.026,.066,'#283535');
- box(gun,.048,.018,-.211,.002,.006,.048,'#768080');
- for(let i=0;i<4;i++)box(gun,-.046,.003,-.225-i*.008,.002,.019,.003,'#5d6868');
+ box(upper,0,.001,-.023,.064,.038,.006,'#313c3e');
+ for(let i=0;i<5;i++)box(upper,0,-.013+i*.006,-.019,.049,.0018,.002,'#697172');
+ box(upper,.046,.009,-.215,.002,.026,.066,'#283535');
+ box(upper,.048,.018,-.211,.002,.006,.048,'#768080');
+ for(let i=0;i<4;i++)box(upper,-.046,.003,-.225-i*.008,.002,.019,.003,'#5d6868');
  const sleeve=oval(gun,.018,-.19,.08,.069,.082,.21,'#495049');sleeve.rotation.x=.39;
  oval(gun,-.093,-.185,.014,.063,.062,.155,'#6a6a55').rotation.y=-.33;
  const flash=piece(gun,new T.OctahedronGeometry(.064),new T.MeshBasicMaterial({color:'#ffcd6e'}),0,.004,-.409);flash.scale.z=1.8;
+ const flareTexture=paint(128,128,(g)=>{
+  const glow=g.createRadialGradient(64,64,0,64,64,62);glow.addColorStop(0,'#fff');glow.addColorStop(.12,'#fffbd8');glow.addColorStop(.32,'#ffbf5299');glow.addColorStop(1,'#ff6a0000');g.fillStyle=glow;g.fillRect(0,0,128,128);
+ });
+ const glow=new T.Sprite(new T.SpriteMaterial({map:flareTexture,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));flash.add(glow);glow.scale.set(.23,.23,.23);
+ const casing=piece(overlay,new T.CylinderGeometry(.005,.006,.026,9), '#b99748',0,0,0);
+ const marks=[],effects=[],dotGeometry=new T.CircleGeometry(.074,11),upAxis=new T.Vector3(0,1,0),forwardAxis=new T.Vector3(0,0,1);
+ const scarTexture=paint(64,64,(g)=>{
+  const gradient=g.createRadialGradient(32,32,1,32,32,31);gradient.addColorStop(0,'#191716');gradient.addColorStop(.39,'#211c19');gradient.addColorStop(.52,'#6c6255');gradient.addColorStop(.64,'#c2b49a99');gradient.addColorStop(1,'#6b604800');
+  g.fillStyle=gradient;g.fillRect(0,0,64,64);
+ });
+ const scarMat=new T.MeshBasicMaterial({map:scarTexture,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2});
+ const tracerGeometry=new T.CylinderGeometry(.012,.019,1,6);
+ const tracerMat=new T.MeshBasicMaterial({color:0xffdd91});
+ const sparksMat=new T.MeshBasicMaterial({color:0xffce81});
+ const particlesGeo=new T.OctahedronGeometry(.023);
+ let effectCursor=0,markCursor=0,kickTime=-Infinity;
+ function addShot(event,local,time){
+  let fx=effects[effectCursor];
+  if(!fx){const trace=new T.Mesh(tracerGeometry,tracerMat),sparks=new T.InstancedMesh(particlesGeo,sparksMat,6);
+   sparks.frustumCulled=false;scene.add(trace,sparks);
+   fx={trace,sparks,start:new T.Vector3(),end:new T.Vector3(),direction:new T.Vector3(),normal:new T.Vector3(),vel:[]};effects.push(fx);}
+  effectCursor=(effectCursor+1)%32;
+  fx.born=time;fx.start.fromArray(event.origin);fx.end.fromArray(event.end);fx.normal.fromArray(event.normal||[0,1,0]);
+  if(local){
+   // Convert the viewmodel muzzle to the world camera's projection.
+   camera.updateMatrixWorld();handCam.updateMatrixWorld();gun.updateMatrixWorld(true);
+   flash.getWorldPosition(fx.start).project(handCam);fx.start.z=.5;fx.start.unproject(camera).sub(camera.position).normalize().multiplyScalar(.86).add(camera.position);
+  }else{fx.start.y=1.29;fx.start.addScaledVector(new T.Vector3(...event.dir),.55);}
+  fx.direction.copy(fx.end).sub(fx.start);fx.length=fx.direction.length();fx.direction.normalize();
+  fx.trace.quaternion.setFromUnitVectors(upAxis,fx.direction);fx.trace.visible=true;
+  fx.surface=Boolean(event.normal);fx.vel=Array.from({length:6},()=>fx.normal.clone().multiplyScalar(1+Math.random()*2).add(new T.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).multiplyScalar(3)));
+  if(fx.surface){
+   let mark=marks[markCursor];if(!mark){mark=new T.Mesh(dotGeometry,scarMat);scene.add(mark);marks.push(mark);}
+   markCursor=(markCursor+1)%72;mark.visible=true;mark.position.copy(fx.end).addScaledVector(fx.normal,.009);
+   mark.quaternion.setFromUnitVectors(forwardAxis,fx.normal);mark.scale.setScalar(.8+Math.random()*.6);
+  }
+ }
+ function updateEffects(time){
+  for(const fx of effects){
+   const age=time-fx.born,travel=Math.min(.10,.025+fx.length*.0014);
+   fx.trace.visible=age<travel+.035;
+   if(fx.trace.visible){
+    const head=Math.min(fx.length,fx.length*(.35+age/travel)),tail=Math.max(0,head-fx.length*Math.max(.06,.62-age*3));
+    fx.trace.position.copy(fx.start).addScaledVector(fx.direction,(head+tail)/2);fx.trace.scale.y=Math.max(.01,head-tail);
+   }
+   const t=age-travel*.55;fx.sparks.visible=fx.surface&&t>=0&&t<.23;
+   if(fx.sparks.visible){
+    fx.vel.forEach((v,i)=>{matrix.position.copy(fx.end).addScaledVector(v,t);matrix.position.y-=4*t*t;matrix.scale.setScalar(1-t/.23);matrix.rotation.set(0,i+t,0);matrix.updateMatrix();fx.sparks.setMatrixAt(i,matrix.matrix);});fx.sparks.instanceMatrix.needsUpdate=true;
+   }
+  }
+ }
  const actors=new Map(),targetSkin=paint(256,384,(g,w,h)=>{
   g.fillStyle='#b79b70';g.fillRect(0,0,w,h);noise(g,w,h,11000);for(const r of [88,69,47,25]){g.strokeStyle='#483e31';g.lineWidth=3;g.beginPath();g.ellipse(128,164,r,r*1.25,0,0,7);g.stroke();}
   g.fillStyle='#ac5134';g.fillRect(118,155,20,20);text(g,'PORTO  /  17',52,351,23,'#463e31');
@@ -201,7 +239,7 @@ export function createHarbor(canvas){
   return g;
  }
  const clock=new T.Clock();let width=0,height=0,lastRound=-1,lastShift=0,previewTime=0;
- return function draw(state,p,angle,pitch,playing){
+ return function draw(state,p,angle,pitch,playing,shots,kicked){
   const dt=Math.min(.1,clock.getDelta()),blend=1-Math.exp(-dt*19);
   if(width!==innerWidth||height!==innerHeight){width=innerWidth;height=innerHeight;renderer.setPixelRatio(Math.min(devicePixelRatio,1.45));renderer.setSize(width,height,false);camera.aspect=handCam.aspect=width/height;camera.updateProjectionMatrix();handCam.updateProjectionMatrix();}
   const present=new Set();
@@ -221,10 +259,15 @@ export function createHarbor(canvas){
    camera.position.x+=(p.x*S-camera.position.x)*blend;camera.position.z+=(p.z*S-camera.position.z)*blend;
    camera.position.y=1.66+Math.sin(clock.elapsedTime*13)*lastShift*.024;
    camera.rotation.order='YXZ';camera.rotation.set(pitch,-angle-Math.PI/2,0);
-   const recoil=Math.max(0,1-(state.now-p.shot)/130),reload=p.reload?Math.sin(Math.PI*Math.max(0,Math.min(1,(p.reload-state.now)/1400))):0;
+   if(kicked)kickTime=clock.elapsedTime;
+   const age=clock.elapsedTime-kickTime,recoil=Math.max(0,1-age/.16),reload=p.reload?Math.sin(Math.PI*Math.max(0,Math.min(1,(p.reload-state.now)/1400))):0;
    gun.position.set(.173+Math.sin(clock.elapsedTime*6)*lastShift*.006,-.143-reload*.09,-.55+recoil*.026);
-   gun.rotation.set(.035+recoil*.18-reload*.62,.16,-.045-reload*.66);flash.visible=state.now-p.shot<65;
-  }else{previewTime+=dt;camera.position.set(7+Math.sin(previewTime*.07)*1.5,6.9,27);camera.lookAt(34,3,12);lastRound=-1;}
+   gun.rotation.set(.035+recoil*.18-reload*.62,.16,-.045-reload*.66);flash.visible=age<.064;upper.position.z=.047*recoil;if(flash.visible)flash.rotation.z=kickTime*11;
+   casing.visible=age<.32;if(casing.visible){casing.position.copy(gun.position);casing.position.x+=.035+age*.78;casing.position.y+=.03+age*.64-2.8*age*age;casing.position.z+=age*.19-.13;casing.rotation.set(age*22,.4,age*16);}
+   for(const shot of shots)addShot(shot,shot.shooter===p.id,clock.elapsedTime);
+   updateEffects(clock.elapsedTime);
+   }else{if(lastRound!==-1){for(const m of marks)m.visible=false;for(const fx of effects){fx.born=-Infinity;fx.trace.visible=fx.sparks.visible=false;}kickTime=-Infinity;}
+   previewTime+=dt;camera.position.set(7+Math.sin(previewTime*.07)*1.5,6.9,27);camera.lookAt(34,3,12);lastRound=-1;}
   renderer.autoClear=true;renderer.render(scene,camera);
   if(playing&&p.hp){renderer.autoClear=false;renderer.clearDepth();renderer.render(overlay,handCam);}
  };

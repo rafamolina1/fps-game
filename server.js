@@ -2,7 +2,7 @@ import http from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {randomBytes,randomUUID} from 'node:crypto';
 import {WebSocketServer} from 'ws';
-import {cast,solid,starts,targets} from './public/world.js';
+import {traceSurface,solid,starts,targets} from './public/world.js';
 
 const files=new Map([['/','index.html'],['/game.js','game.js'],['/harbor.js','harbor.js'],['/three.module.min.js','../node_modules/three/build/three.module.min.js'],['/style.css','style.css'],['/world.js','world.js']]);
 const server=http.createServer(async(req,res)=>{
@@ -29,7 +29,9 @@ function clearAt(x,z){return [-.18,.18].every(a=>[-.18,.18].every(b=>!solid(x+a,
 function fire(r,p,now){
  p.ammo--;p.shot=now;
  const dx=Math.cos(p.angle),dz=Math.sin(p.angle);
- let nearest=cast(p.x,p.z,dx,dz).depth,victim=null;
+ const cp=Math.cos(p.pitch),dir=[dx*cp,Math.sin(p.pitch),dz*cp],origin=[p.x*2.6,1.66,p.z*2.6];
+ const surface=traceSurface(origin,dir);
+ let nearest=surface.distance*cp/2.6,victim=null;
  const candidates=r.solo?r.dummies:r.players.filter(q=>q.hp>0&&q!==p);
  for(const q of candidates){
   if(q.down>now)continue;
@@ -40,6 +42,10 @@ function fire(r,p,now){
   const distance=along-Math.sqrt(.26**2-across**2);
   if(distance<nearest){nearest=distance;victim=q;}
  }
+ const travel=nearest*2.6/cp;
+ const end=origin.map((v,i)=>v+dir[i]*travel);
+ const event={type:'shot',shooter:p.id,origin,end,dir,normal:victim?null:surface.normal,target:victim?.id||null};
+ for(const q of r.players)send(q.ws,event);
  if(!victim||victim.team===p.team)return;
  p.hit=now;
  if(r.solo){victim.down=now+1500;p.kills++;return;}
@@ -56,7 +62,7 @@ function tick(r,now){
   if(clearAt(x,p.z))p.x=x;if(clearAt(p.x,z))p.z=z;
   if(p.reload&&now>=p.reload){p.ammo=12;p.reload=0;}
   if(!p.reload&&k.reload&&p.ammo<12)p.reload=now+1400;
-  if(!p.reload&&k.fire&&p.ammo&&now-p.shot>=200)fire(r,p,now);
+
  }
  if(r.solo){if(now>=r.deadline)r.phase='result';return;}
  const alive=[0,1].map(t=>r.players.filter(p=>p.team===t&&p.hp>0).length);
@@ -93,10 +99,14 @@ sockets.on('connection',ws=>{
    r.players.forEach((q,i)=>{q.team=i%2;q.kills=0;});round(r);
   }
   if(m.type==='lobby'&&p.id===r.host){r.phase='lobby';r.players.forEach(q=>q.input={});}
-  if(m.type==='input'&&r.phase==='play'&&p.hp&&Number.isFinite(m.angle)){
+  if((m.type==='input'||m.type==='shoot')&&r.phase==='play'&&p.hp&&Number.isFinite(m.angle)){
    p.pitch=Number.isFinite(m.pitch)?Math.min(.98,Math.max(-.98,m.pitch)):0;
    p.angle=m.angle%(Math.PI*2);
-   p.input={forward:Math.sign(Number(m.forward)||0),side:Math.sign(Number(m.side)||0),fire:m.fire===true,reload:m.reload===true};
+   if(m.type==='shoot'){
+    const now=Date.now();if(!p.reload&&p.ammo&&now-p.shot>=200)fire(r,p,now);
+    return;
+   }
+   p.input={forward:Math.sign(Number(m.forward)||0),side:Math.sign(Number(m.side)||0),reload:m.reload===true};
   }
  });
  ws.on('close',()=>{
