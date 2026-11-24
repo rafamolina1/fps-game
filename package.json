@@ -1,1 +1,1 @@
-{"name":"patio-fps","private":true,"type":"module","scripts":{"start":"node server.js","build":"node build.js"},"dependencies":{"ws":"8.18.3"}}
+{"name":"patio-fps","private":true,"type":"module","scripts":{"start":"node server.js","build":"node build.js"},"dependencies":{"three":"0.170.0","ws":"8.18.3"}}

@@ -1,5 +1,5 @@
 # Pátio
-FPS de navegador com mapa original, teclado e mouse. Duas equipes disputam rodadas de eliminação de 90 segundos. Cada jogador tem uma vida por rodada. Ao fim do tempo, ganha quem tiver mais sobreviventes. Empates não dão pontos. A primeira equipe com três vitórias ganha a partida.
+FPS de navegador com teclado e mouse. O mapa Porto Sul usa WebGL 2, materiais gerados no cliente e sombras estáticas. A biblioteca 3D é servida junto com o jogo. Duas equipes disputam rodadas de eliminação de 90 segundos. Cada jogador tem uma vida por rodada. Ao fim do tempo, ganha quem tiver mais sobreviventes. Empates não dão pontos. A primeira equipe com três vitórias ganha a partida.
 
 ## Começar
 Com Node 20 ou superior, execute npm install e npm start. Abra o endereço mostrado no terminal, digite um apelido e crie uma sala. Sozinho, use Iniciar treino para praticar com alvos. Para competir, convide de 2 a 8 jogadores pelo link ou código antes de iniciar. Na rede local, abra o jogo pelo endereço LAN do anfitrião antes de copiar o convite.

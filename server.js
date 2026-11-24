@@ -4,7 +4,7 @@ import {randomBytes,randomUUID} from 'node:crypto';
 import {WebSocketServer} from 'ws';
 import {cast,solid,starts,targets} from './public/world.js';
 
-const files=new Map([['/','index.html'],['/game.js','game.js'],['/style.css','style.css'],['/world.js','world.js']]);
+const files=new Map([['/','index.html'],['/game.js','game.js'],['/harbor.js','harbor.js'],['/three.module.min.js','../node_modules/three/build/three.module.min.js'],['/style.css','style.css'],['/world.js','world.js']]);
 const server=http.createServer(async(req,res)=>{
  const file=files.get(req.url.split('?')[0]);
  if(!file){res.writeHead(404).end();return;}
@@ -35,6 +35,8 @@ function fire(r,p,now){
   if(q.down>now)continue;
   const x=q.x-p.x,z=q.z-p.z,along=x*dx+z*dz,across=x*dz-z*dx;
   if(along<=0||Math.abs(across)>.26)continue;
+  const y=1.66+Math.tan(p.pitch||0)*along*2.6;
+  if(y<(r.solo?.89:.08)||y>2.18)continue;
   const distance=along-Math.sqrt(.26**2-across**2);
   if(distance<nearest){nearest=distance;victim=q;}
  }
@@ -92,6 +94,7 @@ sockets.on('connection',ws=>{
   }
   if(m.type==='lobby'&&p.id===r.host){r.phase='lobby';r.players.forEach(q=>q.input={});}
   if(m.type==='input'&&r.phase==='play'&&p.hp&&Number.isFinite(m.angle)){
+   p.pitch=Number.isFinite(m.pitch)?Math.min(.98,Math.max(-.98,m.pitch)):0;
    p.angle=m.angle%(Math.PI*2);
    p.input={forward:Math.sign(Number(m.forward)||0),side:Math.sign(Number(m.side)||0),fire:m.fire===true,reload:m.reload===true};
   }
