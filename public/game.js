@@ -1,4 +1,4 @@
-import * as T from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+import * as T from '/vendor/three.module.js';
 import {boxes,radius} from './world.js';
 const $=id=>document.getElementById(id);
 const scene=new T.Scene(), camera=new T.PerspectiveCamera(75,1,.06,160);
