@@ -4,7 +4,7 @@ import {randomBytes,randomUUID} from 'node:crypto';
 import {WebSocketServer} from 'ws';
 import {boxes,radius,spawns} from './public/world.js';
 
-const files={'/':'index.html','/game.js':'game.js','/world.js':'world.js','/style.css':'style.css'};
+const files={'/':'index.html','/game.js':'game.js','/world.js':'world.js','/style.css':'style.css','/vendor/three.module.js':'../node_modules/three/build/three.module.js'};
 const server=http.createServer(async(req,res)=>{
   const file=files[new URL(req.url,'http://localhost').pathname];
   if(typeof file!=='string'){res.writeHead(404).end();return;}
@@ -100,4 +100,13 @@ sockets.on('connection',ws=>{
     else if(r.players.length<2 && r.phase==='play')r.phase='result';
   });
 });
-server.listen(process.env.PORT||3000,'0.0.0.0');
+server.on('error', error => {
+  console.error(error.code === 'EADDRINUSE'
+    ? 'A porta já está em uso. Encerre o outro servidor ou defina PORT.'
+    : error.message);
+  process.exit(1);
+});
+server.listen(process.env.PORT || 3000, '0.0.0.0', () => {
+  console.log('Jogo pronto em http://localhost:' + server.address().port);
+  console.log('Abra esse endereço no navegador. Ctrl+C encerra o servidor.');
+});
