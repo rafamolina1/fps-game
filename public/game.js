@@ -2,7 +2,12 @@ import * as T from '/vendor/three.module.js';
 import {boxes,radius} from './world.js';
 const $=id=>document.getElementById(id);
 const scene=new T.Scene(), camera=new T.PerspectiveCamera(75,1,.06,160);
-const renderer=new T.WebGLRenderer({antialias:true});
+let renderer;
+try {
+ renderer = new T.WebGLRenderer({antialias:true});
+} catch (error) {
+ throw new Error('Não foi possível iniciar o 3D. Ative a aceleração gráfica do navegador e recarregue a página. ' + error.message);
+}
 document.body.prepend(renderer.domElement);renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
 scene.background=new T.Color(0x29234b);scene.fog=new T.FogExp2(0x29234b,.014);
 scene.add(new T.HemisphereLight(0xfff0ff,0x8771dc,2.4));
@@ -48,14 +53,27 @@ function connect(type){
  if(ws && ws.readyState<2)return;
  const name=$('nick').value.trim();if(!name){$('nick').focus();$('msg').textContent='Escolha um apelido.';return;}
  const endpoint=window.GAME_SERVER || location.origin.replace(/^http/,'ws');
- ws=new WebSocket(endpoint);$('msg').textContent='Conectando…';
+ try { ws=new WebSocket(endpoint); }
+ catch (error) { $('msg').textContent='Endereço do servidor inválido: '+error.message; return; }
+ const connection=ws;
+ $('create').disabled=$('join').disabled=true;
+ $('msg').textContent='Conectando…';
+ const timeout=setTimeout(()=>{
+   if(connection===ws && !state){
+     $('msg').textContent='O servidor não respondeu. Confira se npm start continua rodando e abra o endereço mostrado no terminal.';
+     connection.close();
+   }
+ },8000);
+ const ready=()=>{clearTimeout(timeout);$('create').disabled=$('join').disabled=false;};
  ws.onopen=()=>emit({type,name,code:$('code').value.trim(),cap:$('cap').value});
  ws.onerror=()=>$('msg').textContent='Servidor indisponível. Confira a conexão.';
- ws.onclose=()=>{state=null;stop();layout();if(!$('msg').textContent)$('msg').textContent='Conexão encerrada.';};
+ ws.onclose=()=>{ready();state=null;stop();layout();if(!$('msg').textContent)$('msg').textContent='Conexão encerrada.';};
  ws.onmessage=({data})=>{
  const m=JSON.parse(data);
  if(m.type==='error'){$('msg').textContent=m.message;if(!state)ws.close();return;}
- if(m.type==='joined'){id=m.id;$('msg').textContent='';return;}
+ if(m.type==='joined'){ready();id=m.id;$('msg').textContent='';return;}
+ if(m.type!=='state')return;
+ ready();
  const old=state;state=m;
  if(old?.phase!==m.phase){stop();$('msg').textContent='';layout();}
  if(m.phase!=='play'){
