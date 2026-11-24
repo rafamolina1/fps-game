@@ -1,1 +1,12 @@
-{"name":"bagunca-cosmica","private":true,"type":"module","scripts":{"start":"node server.js"},"dependencies":{"ws":"8.18.3"}}
+{
+  "name": "bagunca-cosmica",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "8.18.3",
+    "three": "0.170.0"
+  }
+}
